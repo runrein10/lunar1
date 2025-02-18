@@ -2,8 +2,9 @@
 #include <string>
 #include <iomanip>
 #include <sstream>
-#include <openssl/sha.h>
-#include <openssl/ripemd.h>
+#include <cstdint>
+#include <random>
+#include "CryptoUtil.h" // Assuming CryptoUtil.h contains our custom SHA-256 and RIPEMD-160 implementations
 
 // Function to check for repeating characters
 bool hasRepeatingCharacters(const std::string& key, int maxRepeats = 3) {
@@ -34,54 +35,6 @@ bool hasAscendingDescendingSequence(const std::string& key, int sequenceLength =
     return false;
 }
 
-// Function to compute SHA-256 hash
-std::string sha256(const std::string& data) {
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256_CTX sha256;
-    SHA256_Init(&sha256);
-    SHA256_Update(&sha256, data.c_str(), data.size());
-    SHA256_Final(hash, &sha256);
-    std::stringstream ss;
-    for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
-        ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
-    }
-    return ss.str();
-}
-
-// Function to compute RIPEMD-160 hash
-std::string ripemd160(const std::string& data) {
-    unsigned char hash[RIPEMD160_DIGEST_LENGTH];
-    RIPEMD160_CTX ripemd160;
-    RIPEMD160_Init(&ripemd160);
-    RIPEMD160_Update(&ripemd160, data.c_str(), data.size());
-    RIPEMD160_Final(hash, &ripemd160);
-    std::stringstream ss;
-    for (int i = 0; i < RIPEMD160_DIGEST_LENGTH; ++i) {
-        ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
-    }
-    return ss.str();
-}
-
-// Function to convert a private key to a Bitcoin address (placeholder logic)
-std::string privateKeyToAddress(const std::string& privateKeyHex) {
-    // Step 1: Generate public key (placeholder; replace with actual logic)
-    std::string publicKey = privateKeyHex; // Placeholder
-
-    // Step 2: Hash the public key
-    std::string sha256Hash = sha256(publicKey);
-    std::string ripemd160Hash = ripemd160(sha256Hash);
-
-    // Step 3: Add version byte (0x00 for Bitcoin mainnet)
-    std::string payload = "\x00" + ripemd160Hash;
-
-    // Step 4: Compute checksum
-    std::string checksum = sha256(sha256(payload)).substr(0, 8);
-
-    // Step 5: Encode in Base58 (placeholder; use a Base58 library for real implementation)
-    std::string address = payload + checksum; // Placeholder
-    return address;
-}
-
 // Function to display a progress bar
 void displayProgress(uint64_t current, uint64_t end) {
     const int barWidth = 50;
@@ -102,8 +55,15 @@ void displayProgress(uint64_t current, uint64_t end) {
 void searchKeys(uint64_t start, uint64_t end, const std::string& targetAddress) {
     uint64_t totalKeys = end - start + 1;
     uint64_t keysChecked = 0;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<uint64_t> dis(start, end);
 
     for (uint64_t i = start; i <= end; ++i) {
+        if (keysChecked % 50000000 == 0 && keysChecked != 0) {
+            i = dis(gen); // Randomize start point every 50 million keys
+        }
+
         std::stringstream ss;
         ss << std::hex << i;
         std::string key = ss.str();
