@@ -1,25 +1,28 @@
 #ifndef _CRYPTO_UTIL_H
+#define _CRYPTO_UTIL_H
+
+#include <cstdint>
+#include <array>
 
 namespace crypto {
 
-	class Rng {
-		unsigned int _state[16];
-		unsigned int _counter;
+    class Rng {
+        std::array<uint32_t, 16> _state;
+        uint32_t _counter;
 
-		void reseed();
+        void reseed();
 
-	public:
-		Rng();
-		void get(unsigned char *buf, int len);
-	};
+    public:
+        Rng();
+        void get(unsigned char *buf, int len);
+    };
 
+    void ripemd160(const uint32_t *msg, uint32_t *digest);
 
-	void ripemd160(unsigned int *msg, unsigned int *digest);
+    void sha256Init(uint32_t *digest);
+    void sha256(const uint32_t *msg, uint32_t *digest);
 
-	void sha256Init(unsigned int *digest);
-	void sha256(unsigned int *msg, unsigned int *digest);
-
-	unsigned int checksum(const unsigned int *hash);
+    uint32_t checksum(const uint32_t *hash);
 };
 
 #endif
