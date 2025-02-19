@@ -4,7 +4,30 @@
 #include <sstream>
 #include <cstdint>
 #include <random>
-#include "CryptoUtil.h" // Assuming CryptoUtil.h contains our custom SHA-256 and RIPEMD-160 implementations
+#include "CryptoUtil.h"
+
+// Function to compute SHA-256 hash
+std::string sha256(const std::string& data) {
+    uint32_t digest[8];
+    crypto::sha256Init(digest);
+    crypto::sha256(reinterpret_cast<const uint32_t*>(data.data()), digest);
+    std::stringstream ss;
+    for (int i = 0; i < 8; ++i) {
+        ss << std::hex << std::setw(8) << std::setfill('0') << digest[i];
+    }
+    return ss.str();
+}
+
+// Function to compute RIPEMD-160 hash
+std::string ripemd160(const std::string& data) {
+    uint32_t digest[5];
+    crypto::ripemd160(reinterpret_cast<const uint32_t*>(data.data()), digest);
+    std::stringstream ss;
+    for (int i = 0; i < 5; ++i) {
+        ss << std::hex << std::setw(8) << std::setfill('0') << digest[i];
+    }
+    return ss.str();
+}
 
 // Function to check for repeating characters
 bool hasRepeatingCharacters(const std::string& key, int maxRepeats = 3) {
