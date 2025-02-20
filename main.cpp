@@ -2,32 +2,10 @@
 #include <string>
 #include <iomanip>
 #include <sstream>
-#include <cstdint>
 #include <random>
-#include "CryptoUtil.h"
-
-// Function to compute SHA-256 hash
-std::string sha256(const std::string& data) {
-    uint32_t digest[8];
-    crypto::sha256Init(digest);
-    crypto::sha256(reinterpret_cast<const uint32_t*>(data.data()), digest);
-    std::stringstream ss;
-    for (int i = 0; i < 8; ++i) {
-        ss << std::hex << std::setw(8) << std::setfill('0') << digest[i];
-    }
-    return ss.str();
-}
-
-// Function to compute RIPEMD-160 hash
-std::string ripemd160(const std::string& data) {
-    uint32_t digest[5];
-    crypto::ripemd160(reinterpret_cast<const uint32_t*>(data.data()), digest);
-    std::stringstream ss;
-    for (int i = 0; i < 5; ++i) {
-        ss << std::hex << std::setw(8) << std::setfill('0') << digest[i];
-    }
-    return ss.str();
-}
+#include "CryptoUtil.h" // For SHA-256 and RIPEMD-160 hashing
+#include "AddressUtil.h" // For privateKeyToAddress and address utilities
+#include "secp256k1.h"   // For secp256k1 elliptic curve operations
 
 // Function to check for repeating characters
 bool hasRepeatingCharacters(const std::string& key, int maxRepeats = 3) {
@@ -96,7 +74,7 @@ void searchKeys(uint64_t start, uint64_t end, const std::string& targetAddress) 
 
         // Check if the key is valid
         if (!hasRepeatingCharacters(key) && !hasAscendingDescendingSequence(key)) {
-            std::string address = privateKeyToAddress(key);
+            std::string address = Address::privateKeyToAddress(key);
             if (address == targetAddress) {
                 std::cout << "\nMatch found! Private key: " << key << ", Address: " << address << std::endl;
                 return;
