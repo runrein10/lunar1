@@ -1,5 +1,5 @@
 #include "AddressUtil.h"
-#include "CryptoUtil.h" // For SHA-256 and RIPEMD-160 hashing
+#include "CryptoUtil.h"
 #include <sstream>
 #include <iomanip>
 
@@ -22,8 +22,13 @@ namespace Address {
 
         // Step 4: Compute checksum (double SHA-256)
         unsigned int checksum[8];
-        crypto::sha256(reinterpret_cast<unsigned char*>(payload), 21, reinterpret_cast<unsigned char*>(checksum));
-        crypto::sha256(reinterpret_cast<unsigned char*>(checksum), 32, reinterpret_cast<unsigned char*>(checksum));
+        uint32_t sha256Digest[8];
+
+        // First SHA-256 hash
+        crypto::sha256(reinterpret_cast<const uint32_t*>(payload), sha256Digest);
+
+        // Second SHA-256 hash
+        crypto::sha256(sha256Digest, checksum);
 
         // Step 5: Combine payload and checksum
         unsigned int addressData[7];
