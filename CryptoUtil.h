@@ -17,11 +17,16 @@ namespace crypto {
         void get(unsigned char *buf, int len);
     };
 
+    // RIPEMD-160 hash function
     void ripemd160(const uint32_t *msg, uint32_t *digest);
 
+    // SHA-256 initialization
     void sha256Init(uint32_t *digest);
+
+    // SHA-256 hash function
     void sha256(const uint32_t *msg, uint32_t *digest);
 
+    // Compute checksum
     uint32_t checksum(const uint32_t *hash);
 };
 
